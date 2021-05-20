@@ -1,0 +1,23 @@
+<idea-plugin>
+    <id>com.sdc.vault</id>
+    <name>Vault Auth</name>
+    <vendor>David Steinsland and Spencer Carlson</vendor>
+
+    <!-- Product and plugin compatibility requirements -->
+    <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
+
+
+    <extensions defaultExtensionNs="com.intellij.database">
+        <connectionInterceptor implementation="com.sdc.vault.ui.VaultAuthInterceptor" order="first"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.sdc.vault.state.AppSettingsState"/>
+
+        <applicationConfigurable parentId="tools" instance="com.sdc.vault.settings.ui.AppSettingsConfigurable"
+                                 id="com.sdc.vault.settings.ui.AppSettingsConfigurable"
+                                 displayName="Vault"/>
+    </extensions>
+</idea-plugin>
