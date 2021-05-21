@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import org.gradle.kotlin.dsl.accessors.runtime.conventionPluginByName
 import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -95,6 +96,7 @@ tasks {
         version(pluginVersion)
         sinceBuild(pluginSinceBuild)
         untilBuild(pluginUntilBuild)
+        pluginId(pluginGroup)
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription(

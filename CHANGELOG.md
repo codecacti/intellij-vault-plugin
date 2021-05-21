@@ -1,10 +1,7 @@
-<!-- Keep a Changelog guide -> https://keepachangelog.com -->
-
-# Vault Changelog
-
-## [Unreleased]
+# Changelog
 
 ## [1.0.0]
 ### Added
-- Forked from davidsteinsland/postgres-vault-auth (https://github.com/davidsteinsland/postgres-vault-auth)
-- System wide vault authentication settings
+- System Settings to persist authorization method and credentials
+- Uses vault's HTTP endpoints to communicate to vault (except for `vault login`)
+  - See vault's [lookup-a-token-self](https://www.vaultproject.io/api/auth/token#lookup-a-token-self) documentation
