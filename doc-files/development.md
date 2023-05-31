@@ -19,3 +19,8 @@
 ### Screenshot Examples
 ![Debug Log Settings](./img/Debug%20Log%20Settings.png)
 ![Configure](./img/Configure%20Debug%20Logs.png)
+
+
+https://plugins.jetbrains.com/plugin/16828-vault
+https://github.com/davidsteinsland/postgres-vault-auth - forked one
+https://plugins.jetbrains.com/plugin/18522-datagrip-vault - popular one

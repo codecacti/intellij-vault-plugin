@@ -59,6 +59,7 @@ internal class VaultService {
 
         logger.debug("Reading secret. Authenticated")
         val json = client.read(getHost(host), token, path)
+        logger.trace("Reading secret response payload. payload=$json")
         json?.let {
             val username = it.path("data").path("username").asText()
             val password = it.path("data").path("password").asText()

@@ -1,0 +1,54 @@
+#! /usr/bin/env bash
+
+# for vault CLI to work with HTTP
+export VAULT_ADDR='http://127.0.0.1:8200'
+export VAULT_TOKEN="hvs.Gd4KJlnh0kAXnb5GDbnbeqwG"
+
+# Is Vault running?
+curl -s -X GET --url http://127.0.0.1:8200/v1/sys/init | jq '.initialized'
+
+# Get auth types
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X GET \
+  --url http://127.0.0.1:8200/v1/sys/auth | jq '.data[].type'
+
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X POST \
+  --url http://127.0.0.1:8200/v1/secret/data/db/postgres1 \
+  -d '{"data": {"password": "mysecretpassword"}}'
+
+
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X GET \
+ --url http://127.0.0.1:8200/v1/secret/data/db/postgres1 | jq '.data.data.password'
+
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X GET \
+  --url http://127.0.0.1:8200/v1/sys/auth
+
+
+# OKTA
+# API method
+# in OKTA Admin > Security > API > Tokens > Create Token
+# Add auth method (https://developer.hashicorp.com/vault/api-docs/system/auth)
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X POST \
+  -d '{"type": "okta", "description": "Login with Okta"}' \
+  --url http://127.0.0.1:8200/v1/sys/auth/okta
+
+# Configure Okta auth method (https://developer.hashicorp.com/vault/api-docs/auth/okta#create-configuration)
+curl -H "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X POST \
+  --url http://127.0.0.1:8200/v1/auth/okta/config \
+  -d '{"org_name": "dev-57686207","api_token": "00smLEuQPf_kilIdt37UcVepuDLfQAdqoKvHhyZU1_", "bypass_okta_mfa": true, "base_url": "okta.com"}'
+
+# Login
+curl -sX POST \
+    -d '{"password": "K7At6i7XkofC28spJSCyFbOi84Zb"}' \
+    --url http://127.0.0.1:8200/v1/auth/okta/login/spencerdcarlson@gmail.com | jq
+
+# Read configuration
+curl -sH "X-Vault-Token: hvs.Gd4KJlnh0kAXnb5GDbnbeqwG" \
+  -X GET \
+  --url http://127.0.0.1:8200/v1/auth/okta/config | jq
+
