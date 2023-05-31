@@ -29,6 +29,7 @@ class VaultHTTPClient {
             .header("X-Vault-Token", token)
             .build()
 
+        logger.debug("Read secret request. request=$request")
         return client.sendAsync(request, BodyHandlers.ofString())
             .thenApply { obj: HttpResponse<String> -> obj.body() }
             .thenApply { mapper.readValue(it, ObjectNode::class.java) }

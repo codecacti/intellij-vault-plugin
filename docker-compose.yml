@@ -1,0 +1,20 @@
+services:
+  vault:
+    image: hashicorp/vault:1.13.2
+    command:
+      - "server"
+      - "-dev"
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_LOG_LEVEL: trace
+  postgres:
+    image: postgres:15.3-alpine3.18
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5432:5432"
+
+

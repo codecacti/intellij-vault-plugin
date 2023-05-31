@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+brew install --cask oktadeveloper/tap/okta
+brew reinstall okta
+okta register
+
+# Admin > Security > API > Tokens > Create Token
