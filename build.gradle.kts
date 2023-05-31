@@ -130,13 +130,13 @@ tasks {
 changelog {
     version.set(projectVersion)
     path.set(file("CHANGELOG.md").canonicalPath)
-    header.set(provider { "[${version.get()}] - ${date()}" })
+    header.set(provider { "${version.get()} - ${date()}" })
     introduction.set("Fetches credentials for a database from Vault.")
     itemPrefix.set("-")
     keepUnreleasedSection.set(true)
     unreleasedTerm.set("Unreleased")
     groups.set(listOf("Added"))
-    lineSeparator.set("\n")
+//    lineSeparator.set("\n")
     combinePreReleases.set(true)
     repositoryUrl.set("https://github.com/spencerdcarlson/intellij-vault-plugin")
     sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->

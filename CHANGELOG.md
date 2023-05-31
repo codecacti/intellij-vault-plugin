@@ -8,7 +8,7 @@ Fetches credentials for a database from Vault.
 ## [1.0.0] - 2021-05-25
 ### Added
 - System Settings to persist authorization method and credentials
-- - See vault's [lookup-a-token-self](https://www.vaultproject.io/api/auth/token#lookup-a-token-self) documentation
+- See vault's [lookup-a-token-self](https://www.vaultproject.io/api/auth/token#lookup-a-token-self) documentation
 
 [Unreleased]: https://github.com/spencerdcarlson/intellij-vault-plugin/compare/1.1.0...HEAD
 [1.1.0]: https://github.com/spencerdcarlson/intellij-vault-plugin/compare/1.0.0...1.1.0
