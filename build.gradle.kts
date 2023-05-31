@@ -3,6 +3,7 @@ import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.changelog.date
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.utils.addToStdlib.ifFalse
@@ -67,17 +68,11 @@ tasks {
     withType<Detekt>().configureEach {
         jvmTarget = "1.8"
         reports {
-            // New way (not working)
-//            html.required.set(true)
-//            xml.required.set(true)
-//            txt.required.set(true)
+            html.required.set(true)
+            xml.required.set(true)
+            txt.required.set(true)
             // sarif.required.set(true)
             // md.required.set(true)
-
-            // Old way
-            html.enabled = true // observe findings in your browser with structure and code snippets
-            xml.enabled = true // checkstyle like format mainly for integrations like Jenkins
-            txt.enabled = true // similar to the console output, contains issue signature to manually edit baseline files
         }
     }
 
@@ -136,20 +131,22 @@ changelog {
     version.set(projectVersion)
     path.set(file("CHANGELOG.md").canonicalPath)
     header.set(provider { "[${version.get()}] - ${date()}" })
-    introduction.set(
-            """
-        My awesome project that provides a lot of useful features, like:
-        
-        - Feature 1
-        - Feature 2
-        - and Feature 3
-        """.trimIndent()
-    )
+    introduction.set("Fetches credentials for a database from Vault.")
     itemPrefix.set("-")
     keepUnreleasedSection.set(true)
-    unreleasedTerm.set("[Unreleased]")
-    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+    unreleasedTerm.set("Unreleased")
+    groups.set(listOf("Added"))
     lineSeparator.set("\n")
     combinePreReleases.set(true)
-//    sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased -> "foo" })
+    repositoryUrl.set("https://github.com/spencerdcarlson/intellij-vault-plugin")
+    sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
+        repositoryUrl + when {
+            isUnreleased -> when (previousVersion) {
+                null -> "/commits"
+                else -> "/compare/$previousVersion...HEAD"
+            }
+            previousVersion == null -> "/commits/$currentVersion"
+            else -> "/compare/$previousVersion...$currentVersion"
+        }
+    })
 }
