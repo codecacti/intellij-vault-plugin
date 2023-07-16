@@ -9,7 +9,7 @@
         * <change-notes>
     -->
     <name>Vault</name>
-    <vendor url="https://github.com/spencerdcarlson/intellij-vault-plugin" email="spencerdcarlson@gmail.com">Spencer Carlson and David Steinsland</vendor>
+    <vendor url="https://github.com/codecacti/intellij-vault-plugin" email="spencerdcarlson@gmail.com">CodeCacti</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

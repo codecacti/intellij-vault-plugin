@@ -1,0 +1,97 @@
+#! /usr/bin/env bash
+
+# Is Vault running?
+curl -sX GET --url "${VAULT_ADDR}/v1/sys/init" | jq '.initialized'
+
+# Get auth all types data
+curl -sX GET \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/sys/auth" \
+  | jq
+
+curl -sX GET \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/sys/auth" \
+  | jq '.data[].type'
+
+# Set KV value
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/secret/data/db/postgres" \
+  -d '{"data": {"username": "postgres", "password": "mysecretpassword"}}'
+
+# Get KV value
+curl -sX GET \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/secret/data/db/postgres" \
+  | jq '.data.data.password'
+
+# List
+curl -sX GET \
+    -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+    "${VAULT_ADDR}/v1/sys/mounts" \
+    | jq
+
+# Enable KV version 1 Secret Engine
+curl -sX POST \
+    -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+    --url "${VAULT_ADDR}/v1/sys/mounts/kv" \
+    -d '{"type": "kv", "options": {"version": 1}}'
+
+curl -sX GET \
+    -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+    "${VAULT_ADDR}/v1/kv/db/nokey" \
+    | jq
+
+# Create policy for okta auth method
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -d '{"policy": "path \"secret/*\" { capabilities = [\"create\", \"read\", \"update\", \"patch\", \"delete\", \"list\"] }" }' \
+  --url "${VAULT_ADDR}/v1/sys/policy/okta-token-users"
+
+# List policy
+# vault read -output-curl-string sys/policy/okta-token-users
+
+
+# OKTA
+# API method
+# in OKTA Admin > Security > API > Tokens > Create Token
+# Add auth method (https://developer.hashicorp.com/vault/api-docs/system/auth)
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -d '{"type": "okta", "description": "Login with Okta"}' \
+  --url "${VAULT_ADDR}/v1/sys/auth/okta"
+
+# Configure Okta auth method (https://developer.hashicorp.com/vault/api-docs/auth/okta#create-configuration)
+export OKTA_API_TOKEN="00smLEuQPf_kilIdt37UcVepuDLfQAdqoKvHhyZU1_"
+export OKTA_COMPANY_NAME="dev-57686207"
+
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/auth/okta/config" \
+  -d "{\"org_name\": \"${OKTA_COMPANY_NAME}\",\"api_token\": \"${OKTA_API_TOKEN}\", \"bypass_okta_mfa\": true, \"token_policies\": \"\"}"
+
+# Login
+curl -sX POST \
+    -d '{"password": "K7At6i7XkofC28spJSCyFbOi84Zb"}' \
+    --url "${VAULT_ADDR}/v1/auth/okta/login/spencerdcarlson@gmail.com" \
+    | jq
+
+# Read configuration
+curl -sH "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -X GET \
+  --url "${VAULT_ADDR}/v1/auth/okta/config" \
+  | jq
+
+
+# Vault self token inspect
+curl -sX GET \
+    -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+    "${VAULT_ADDR}/v1/auth/token/lookup-self"
+
+
+# TODO: Figure out how to set permissions so that OKTA users can see the kv secret engine
+#The following templated policy allow to read the path associated with the Kubernetes service account namespace of the identity:
+#path "secret/data/{{identity.entity.aliases.auth_kubernetes_xxxx.metadata.service_account_namespace}}/*" {
+#  capabilities = ["read"]
+#}

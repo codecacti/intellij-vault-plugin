@@ -12,12 +12,15 @@ import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 
 class VaultHTTPClient {
+    companion object {
+        const val TIMEOUT = 20L
+    }
     private val logger = Logger.getInstance(VaultHTTPClient::class.java)
     private val mapper = jacksonObjectMapper()
     private val client = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
         .followRedirects(HttpClient.Redirect.NORMAL)
-        .connectTimeout(Duration.ofSeconds(20))
+        .connectTimeout(Duration.ofSeconds(TIMEOUT))
         .authenticator(Authenticator.getDefault())
         .build()
 
@@ -29,6 +32,7 @@ class VaultHTTPClient {
             .header("X-Vault-Token", token)
             .build()
 
+        logger.debug("Read secret request. request=$request")
         return client.sendAsync(request, BodyHandlers.ofString())
             .thenApply { obj: HttpResponse<String> -> obj.body() }
             .thenApply { mapper.readValue(it, ObjectNode::class.java) }

@@ -19,3 +19,14 @@
 ### Screenshot Examples
 ![Debug Log Settings](./img/Debug%20Log%20Settings.png)
 ![Configure](./img/Configure%20Debug%20Logs.png)
+
+### Plugins
+* Vault
+  * [marketplace](https://plugins.jetbrains.com/plugin/16828-vault)
+  * [source](https://github.com/codecacti/intellij-vault-plugin)
+* postgresql-vault-auth (⎇)
+  * [marketplace](https://plugins.jetbrains.com/plugin/16104-postgresql-vault-auth)
+  * [source](https://github.com/davidsteinsland/postgres-vault-auth)
+* Datagrip-Vault (Popular)
+  * [marketplace](https://plugins.jetbrains.com/plugin/18522-datagrip-vault)
+  * [source](https://github.com/premium-minds/datagrip-vault-plugin)
