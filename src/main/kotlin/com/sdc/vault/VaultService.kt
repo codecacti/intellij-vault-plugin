@@ -23,6 +23,7 @@ internal class VaultService {
         logger.debug("Authenticate. force=$force method=$method")
         logger.trace("Authenticate. args=$args")
         if (!force && isAuthenticated(host)) return true
+        // TODO: Upgrade to using API instead of CLI tool.
         val client = VaultCLIClient()
         return if (client.authenticate(getHost(host), method, args)) {
             logger.debug("Authenticate was successful. Saving auth token.")
