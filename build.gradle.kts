@@ -54,7 +54,6 @@ detekt {
     buildUponDefaultConfig = true
 }
 
-
 tasks {
     // Set the compatibility versions to 11
     withType<JavaCompile> {
@@ -88,26 +87,28 @@ tasks {
         sinceBuild.set(providers.gradleProperty("plugin.sinceBuild").get())
         untilBuild.set(providers.gradleProperty("plugin.untilBuild").get())
         pluginId.set(pluginGroup)
-        changeNotes.set(provider {
-            changelog.renderItem(
+        changeNotes.set(
+            provider {
+                changelog.renderItem(
                     changelog
-                            .getUnreleased()
-                            .withHeader(false)
-                            .withEmptySections(false),
+                        .getUnreleased()
+                        .withHeader(false)
+                        .withEmptySections(false),
                     Changelog.OutputType.HTML
-            )
-        })
+                )
+            }
+        )
         pluginDescription.set(
-                File("./README.md").readText().lines().run {
-                    val start = "<!-- Plugin description -->"
-                    val end = "<!-- Plugin description end -->"
-                    containsAll(listOf(start, end)).ifFalse { throw GradleException("Plugin description section not found in README.md:\n$start ... $end") }
-                    subList(indexOf(start) + 1, indexOf(end))
-                }.joinToString("\n").run {
-                    val flavour = CommonMarkFlavourDescriptor()
-                    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
-                    HtmlGenerator(this, parsedTree, flavour).generateHtml()
-                }
+            File("./README.md").readText().lines().run {
+                val start = "<!-- Plugin description -->"
+                val end = "<!-- Plugin description end -->"
+                containsAll(listOf(start, end)).ifFalse { throw GradleException("Plugin description section not found in README.md:\n$start ... $end") }
+                subList(indexOf(start) + 1, indexOf(end))
+            }.joinToString("\n").run {
+                val flavour = CommonMarkFlavourDescriptor()
+                val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
+                HtmlGenerator(this, parsedTree, flavour).generateHtml()
+            }
         )
     }
 
@@ -118,8 +119,8 @@ tasks {
         // e.g. 1.0.0-alpha.1 => alpha channel
         // See: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#specifying-a-release-channel
         val channel: String = projectVersion
-                .split('-').getOrElse(1) { "default" }.split('.').first()
-        if (listOf("alpha", "beta", "eap").contains(channel)){
+            .split('-').getOrElse(1) { "default" }.split('.').first()
+        if (listOf("alpha", "beta", "eap").contains(channel)) {
             channels.set(listOf(channel))
         }
     }
@@ -139,14 +140,16 @@ changelog {
 //    lineSeparator.set("\n")
     combinePreReleases.set(true)
     repositoryUrl.set("https://github.com/spencerdcarlson/intellij-vault-plugin")
-    sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
-        repositoryUrl + when {
-            isUnreleased -> when (previousVersion) {
-                null -> "/commits"
-                else -> "/compare/$previousVersion...HEAD"
+    sectionUrlBuilder.set(
+        ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
+            repositoryUrl + when {
+                isUnreleased -> when (previousVersion) {
+                    null -> "/commits"
+                    else -> "/compare/$previousVersion...HEAD"
+                }
+                previousVersion == null -> "/commits/$currentVersion"
+                else -> "/compare/$previousVersion...$currentVersion"
             }
-            previousVersion == null -> "/commits/$currentVersion"
-            else -> "/compare/$previousVersion...$currentVersion"
         }
-    })
+    )
 }

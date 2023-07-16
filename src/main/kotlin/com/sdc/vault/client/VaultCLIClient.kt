@@ -15,7 +15,7 @@ import java.nio.file.Paths
 import kotlin.streams.toList
 
 /**
- * VaultCLIClient is used to authenticate so we don't have to build out all of the
+ * VaultCLIClient is used to authenticate, so we don't have to build out all the
  * possible flows, open web browser, oath, etc
  */
 class VaultCLIClient {
@@ -37,6 +37,7 @@ class VaultCLIClient {
             ?.let { "$it/$exec" }
             ?: exec
 
+    @Suppress("SpreadOperator")
     fun authenticate(host: URI, method: VaultAuthMethod, args: Map<String, String>): Boolean {
         val extraArgs = args.entries.stream().map { it.toString() }.toList().toTypedArray()
 
@@ -52,11 +53,15 @@ class VaultCLIClient {
                 *extraArgs,
                 "-format=json"
             )
-        } catch (e: JsonProcessingException) {
-            logger.error("Error parsing result during authentication.", e)
-            return false
-        } catch (err: IOException) {
-            logger.error("Error executing process.", err)
+        } catch (e: IOException) {
+            when (e) {
+                is JsonProcessingException -> {
+                    logger.error("Error parsing result during authentication.", e)
+                }
+                else -> {
+                    logger.error("Error executing process.", e)
+                }
+            }
             return false
         }
         val username = json.path("auth").path("metadata").path("username").asText()
@@ -89,7 +94,8 @@ class VaultCLIClient {
                     "processFailed",
                     "vault cmd",
                     err.message ?: ""
-                )
+                ),
+                err
             )
         }.also { it.waitFor() }.let(onSuccess)
 

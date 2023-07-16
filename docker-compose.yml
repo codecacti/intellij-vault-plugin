@@ -1,6 +1,7 @@
 services:
   vault:
     image: hashicorp/vault:1.13.2
+    container_name: vault
     command:
       - "server"
       - "-dev"
@@ -11,9 +12,10 @@ services:
     environment:
       VAULT_LOG_LEVEL: trace
   postgres:
+    container_name: postgres
     image: postgres:15.3-alpine3.18
     environment:
-      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-postgres}
     ports:
       - "5432:5432"
 

@@ -26,9 +26,14 @@ internal class VaultService {
         val client = VaultCLIClient()
         return if (client.authenticate(getHost(host), method, args)) {
             logger.debug("Authenticate was successful. Saving auth token.")
-            if (refresh) CredentialsManager.setVaultToken(getHost(host), client.readToken())
+            if (refresh) {
+                // TODO: Might want to make the key host+base64(username)
+                CredentialsManager.setVaultToken(getHost(host), client.readToken())
+            }
             true
-        } else false
+        } else {
+            false
+        }
     }
 
     private fun isAuthenticated(
@@ -55,14 +60,36 @@ internal class VaultService {
     ): Credentials {
         logger.debug("Reading secret. host=${getHost(host).host} path=$path")
         logger.trace("Reading secret. token=$token")
+        val tokenInfoJSON = client.lookupToken(getHost(host), token)
+        logger.trace("Vault token info. payload=$tokenInfoJSON")
+
         authenticate(host)
 
         logger.debug("Reading secret. Authenticated")
         val json = client.read(getHost(host), token, path)
-        logger.trace("Reading secret response payload. payload=$json")
+        logger.trace("Reading secret response payload. payload=${json}")
         json?.let {
-            val username = it.path("data").path("username").asText()
-            val password = it.path("data").path("password").asText()
+            val errors = it.path("errors")
+            if (errors != null && errors.isArray) {
+                for (error in errors) {
+                    logger.error("error: $error")
+                }
+            }
+
+            val nested = it.at("/data/data")
+            val data = if  (nested == null || nested.isEmpty) {
+                logger.debug("path data.data does not exist. (reading v1)")
+                it.path("data")
+            }
+            else {
+                logger.debug("path data.data does exist. (reading v2)")
+                it.path("data").path("data")
+            }
+
+            logger.debug("Data Node. data=${data.toPrettyString()}")
+
+            val username = data.path("username").asText()
+            val password = data.path("password").asText()
             logger.debug("Got credentials. username=$username")
             logger.trace("Got credentials. password=$password")
             return Credentials(username, password)
