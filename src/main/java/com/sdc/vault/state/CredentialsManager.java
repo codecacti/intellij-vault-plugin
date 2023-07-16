@@ -10,6 +10,12 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 
 public class CredentialsManager {
+    // TODO: We might want to namespace this to the username so that
+    // we can store multiple usernames per vault host
+    // e.g. one user might have multiple logins for a given vault host or okta host?
+    // how do make sure we auto populate the last value used? We don't want to force the user
+    // to choose if there are multiple or hae to input a username to look up the password / token
+
     private static final String subSystem = "com.sdc.vault";
     private static final CredentialAttributes oktaCredentialAttributes = new CredentialAttributes(CredentialAttributesKt.generateServiceName(subSystem, "okta"));
 
@@ -35,6 +41,11 @@ public class CredentialsManager {
     }
 
     public static String getVaultToken(final URI vaultAddress) {
+        // TODO: Vault tokens need to be associated to the username that was used to fetch and set them
+        // vault does have a display name that serves this purpose. We could look it up everytime
+        //     "display_name": "okta-spencerdcarlson@gmail.com". Calling getinfo for a token gives us that
+        // We can see that a vault token came from okta for username "spencer". I am guessing that
+        // okta sets that to vault after oauth, so it could be different for other oatuh providers (google)
         final CredentialAttributes credentialAttributes = new CredentialAttributes(CredentialAttributesKt.generateServiceName(subSystem, vaultAddress.getHost()));
         final String token = PasswordSafe.getInstance().getPassword(credentialAttributes);
         return (token == null) ? "" : token;

@@ -61,7 +61,7 @@ class VaultAuthInterceptor : DatabaseAuthProvider, CoroutineScope {
                 throw VaultAuthException(property("invalidResponse"))
             }
 
-            // FIXME: ConnectionException is thrown when using SSH on "Test Connection" click
+            // NOTE: ConnectionException is thrown when using SSH on "Test Connection" click
             //  2021-03-26 16:13:34,444 [ 157993]   INFO - om.intellij.ssh.impl.sshj.sshj -
             //  Error from SSHJ local tunnel for SshjSshConnection(ssh-user@ssh-host)@6c9a5e18:
             //  localhost:60695 ==> db-host:5432 while was closing < direct-tcpip
