@@ -1,8 +1,7 @@
 # Vault
 
-![Build](https://github.com/davidsteinsland/postgres-vault-auth/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/16104-postgresql-vault-auth.svg)](https://plugins.jetbrains.com/plugin/16104-postgresql-vault-auth)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/16104-postgresql-vault-auth.svg)](https://plugins.jetbrains.com/plugin/16104-postgresql-vault-auth)
+[![Version](https://img.shields.io/jetbrains/plugin/v/16828.svg)](https://plugins.jetbrains.com/plugin/16828-vault)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/16828.svg)](https://plugins.jetbrains.com/plugin/16828-vault)
 
 <!-- Plugin description -->
 Fetches credentials for a database from Vault.

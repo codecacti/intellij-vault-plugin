@@ -139,7 +139,7 @@ changelog {
     groups.set(listOf("Added"))
 //    lineSeparator.set("\n")
     combinePreReleases.set(true)
-    repositoryUrl.set("https://github.com/spencerdcarlson/intellij-vault-plugin")
+    repositoryUrl.set("https://github.com/codecacti/intellij-vault-plugin")
     sectionUrlBuilder.set(
         ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
             repositoryUrl + when {
