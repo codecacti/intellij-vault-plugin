@@ -1,0 +1,69 @@
+#! /usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PROJECT_ROOT="${SCRIPT_DIR}/../"
+
+source "${PROJECT_ROOT}/.env"
+
+# Is Vault running?
+echo "Check if Vault running..."
+curl -sX GET --url "${VAULT_ADDR}/v1/sys/init" | jq '.initialized'
+
+PG_PATH="db/postgres"
+
+echo "Set a KV (v2) secret for postgres (path: '${PG_PATH}') ..."
+# "secret" is the mount point for v2 (this seems standard, enabled by default)
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/secret/data/${PG_PATH}" \
+  -d "{\"data\": {\"username\": \"postgres\", \"password\": \"${PG_PASSWORD}\"}}"
+
+
+echo "Enable KV engine 1 under path kv..."
+# "kv" is the mount point I created for kv v1 engine, this could likely be anything
+curl -sX POST \
+    -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+    --url "${VAULT_ADDR}/v1/sys/mounts/kv" \
+    -d '{"type": "kv", "options": {"version": 1}}'
+
+echo "Set a KV (v1) secret for postgres (path: '${PG_PATH}') ..."
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/kv/${PG_PATH}" \
+  -d "{\"username\": \"postgres\", \"password\": \"${PG_PASSWORD}\"}"
+
+# OKTA
+# API method
+# in OKTA Admin > Security > API > Tokens > Create Token
+# Add auth method (https://developer.hashicorp.com/vault/api-docs/system/auth)
+echo "Create auth method for okta..."
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -d '{"type": "okta", "description": "Login with Okta"}' \
+  --url "${VAULT_ADDR}/v1/sys/auth/okta"
+
+echo "Create policy for okta auth method (secret/*) ..."
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -d '{"policy": "path \"secret/*\" { capabilities = [\"create\", \"read\", \"update\", \"patch\", \"delete\", \"list\"] }" }' \
+  --url "${VAULT_ADDR}/v1/sys/policy/secret-admin"
+
+echo "Create policy for okta auth method (kv/*) ..."
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  -d '{"policy": "path \"kv/*\" { capabilities = [\"create\", \"read\", \"update\", \"patch\", \"delete\", \"list\"] }" }' \
+  --url "${VAULT_ADDR}/v1/sys/policy/kv-admin"
+
+# Configure Okta auth method (https://developer.hashicorp.com/vault/api-docs/auth/okta#create-configuration)
+echo "Configure okta auth method"
+curl -sX POST \
+  -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" \
+  --url "${VAULT_ADDR}/v1/auth/okta/config" \
+  -d "{\"org_name\": \"${OKTA_COMPANY_NAME}\",\"api_token\": \"${OKTA_API_TOKEN}\", \"bypass_okta_mfa\": true, \"token_policies\": \"secret-admin,kv-admin\"}"
+
+
+# TODO: Figure out how to set permissions so that OKTA users can see the kv secret engine
+#The following templated policy allow to read the path associated with the Kubernetes service account namespace of the identity:
+#path "secret/data/{{identity.entity.aliases.auth_kubernetes_xxxx.metadata.service_account_namespace}}/*" {
+#  capabilities = ["read"]
+#}
